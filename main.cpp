@@ -66,6 +66,11 @@ class admin
         vector<user> myuser;
         static int usernum;
 };
+int admin::usernum = 0;
+admin::admin()
+{
+    adminpassword = "123456";
+}
 
 void admin::establish()
 {
