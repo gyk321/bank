@@ -16,7 +16,7 @@ class user
         void createuser(void);
         int findusertransfer(long&);
         int finduser(long&,string&);
-        void deposit(void);
+        void  deposit(void);
         void dispense(void);
         int transferfrom(string&);
         void transferto(int&,string&);
@@ -68,6 +68,38 @@ void user::createuser(void)
     bankcardID = bankcardID0++;
 }
 
+void user::writeuser(void)
+{
+    cout << userchecknum << endl;
+    cout << name << endl;
+    cout << bankcardID << endl;
+    cout << userpassword << endl;
+    cout << ID << endl;
+    cout << remaining << endl;
+
+    list<string>::iterator iter = usercheck.begin();
+    while (iter != usercheck.end())
+    {
+        cout << *iter << endl;
+        iter ++;
+    }
+}
+
+void user::deposit(void)
+{
+    cout << "请输入存款金额" << endl;
+    cin >> income;
+    remaining += income;
+    cout << "当前余额:" << remianing << endl;
+
+    string newcheck;
+    string string1 = "+";
+    string string2 = changeint(income);
+    string string3 = "--余额:";
+    string string4 = changeint(remaining);
+    string string5 = gettime();
+}
+
 void user::showuser(void)
 {
     cout << "姓名: " << name << endl;
@@ -81,6 +113,15 @@ void user::showuser(void)
         cout << *iter << endl;
         iter++;
     }
+}
+
+int user::finduser(long& bi,string& pw)
+{
+    if (bankcardID == bi && userpassword == pw)
+    {
+        return 0;
+    }
+    return -1;
 }
 
 void user::readuser(void)
@@ -109,6 +150,83 @@ int user::findusertransfer(long& bi)
     return -1;
 }
 
+void user::dispense(void)
+{
+    cout << "请输入取款金额" << endl;
+    cin >> expend;
+    if (remaining < expend)
+    {
+        cout << "当前余额不足" << endl;
+        return;
+    }
+    remaining -= expend;
+    cout << "当前余额:" << remaining << endl;
+
+    string newcheck;
+    string string1 = "-";
+    string string2 = changeint(expend);
+    string string3 = "--余额:";
+    string string4 = changeint(remaining);
+    string string5 = gettime();
+    string string6 = "---ATM取款---";
+    newcheck = string1 + string2 + string3 + string4 + string5 + string6;
+    usercheck.push_back(newcheck);
+    userchecknum++;
+}
+
+int user::transferfrom(string& tempname)
+{
+    cout << "请输入转账金额" << endl;
+    cin >> income;
+    if (remaining < income)
+    {
+        cout << "账户余额不足" << endl;
+        return -1;
+    }
+    else
+    {
+        remaining -= income;
+
+        string newcheck;
+        string string1 = "-";
+        string string2 = changeint(income);
+        string string3 = "---余额";
+        string string4 = changeint(remaining);
+        string string5 = gettime();
+        string string6 = "---转账给";
+        string string7 = "---";
+
+        newcheck = string1 + string2 + string3 + string4 + string5 + string6 + string7 + tempname;
+        usercheck.push_back(newcheck);
+        userchecknum++;
+        return income;
+    }
+    
+    
+}
+
+void user::transferto(int& in,string& tempname)
+{
+    income =  in;
+    remaining += income;
+
+    string newcheck;
+    string string1 = "+";
+    string string2 = changint(income);
+    string string3 = "---余额:";
+    string string4 = changeint(remaining);
+    string string5 = gettime();
+    string string6 = "---来自";
+    string string7 = "的转账---";
+    newcheck = string1 + string2 + string3 + string4 + string5 + string6 + string7 + tempname;
+    usercheck.push_back(newcheck);
+    userchecknum++;
+}
+
+int user::changepassword(void)
+{
+    
+}
 class admin
 {
     public:
