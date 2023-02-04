@@ -48,6 +48,67 @@ class user
 
 long user::bankcardID0 = 633304;
 
+user::user()
+{
+    income = 0;
+    expend = 0;
+    remaining = 0;
+    userchecknum = 0;
+    flag = 1;
+}
+
+void user::createuser(void)
+{
+    cout << "请输入姓名" << endl;
+    cin >> name;
+    cout << "请输入密码" << endl;
+    cin >> userpassword;
+    cout << "请输入身份ID" << endl;
+    cin >> ID;
+    bankcardID = bankcardID0++;
+}
+
+void user::showuser(void)
+{
+    cout << "姓名: " << name << endl;
+    cout << "银行卡号: " << bankcardID << endl;
+    cout << "身份ID: " << ID << endl;
+    cout << "余额: " << remaining << endl;
+
+    list<string>::iterator iter = usercheck.begin();
+    while (iter != usercheck.end())
+    {
+        cout << *iter << endl;
+        iter++;
+    }
+}
+
+void user::readuser(void)
+{
+    string tempcheck;
+    
+    cin >> userchecknum;
+    cin >> name;
+    cin >> bankcardID;
+    cin >> userpassword;
+    cin >> ID;
+    cin >> remaining;
+    for (int i = 0; i < userchecknum; i++)
+    {
+        cin >> tempcheck;
+        usercheck.push_back(tempcheck);
+    }
+}
+
+int user::findusertransfer(long& bi)
+{
+    if (bankcardID == bi)
+    {
+        return 0;
+    }
+    return -1;
+}
+
 class admin
 {
     public:
@@ -101,6 +162,85 @@ void admin::establish()
     }
 }
 
+int admin::cancel(void)
+{
+    string temppassword;
+    long tempbankcardID;
+    int i = 0;
+    cout << "请输入管理密码" << endl;
+    cin >> temppassword;
+    if (temppassword == adminpassword)
+    {
+        cout << "请输入要注销的卡号" << endl;
+        cin >> tempbankcardID;
+        vector<user>::iterator iter = myuser.begin();
+        while(iter != myuser.end())
+        {
+            if (iter->findusertransfer(tempbankcardID) == 0)
+            {
+                myuser.erase(myuser.begin() + i);
+                cout << "账户删除成功" << endl;
+                usernum--;
+                return 0;
+            }
+            iter++;
+            i++;
+        }
+        cout << "卡号输入有误" <<endl;
+        return -1;
+    }
+    else
+    {
+        cout << "密码输入有误" << endl;
+        return -1;
+    }
+}
+
+int admin::login()
+{
+    long tempbankcardID;
+    string tempuserpassword;
+    cout << "请输入卡号" << endl;
+    cin >> tempbankcardID;
+    vector<user>::iterator iter1 = myuser.begin();
+    while (iter1 != myuser.end())
+    {
+        if (iter1->findusertransfer(tempbankcardID) == 0)
+        {
+            if (iter1->getflag() == 1)
+            {
+                for (int i = 3; i > 0; i--)
+                {
+                    cout << "请输入密码,您还有" << i << "次尝试" << endl;
+                    cin >> tempuserpassword;
+                    vector<user>::iterator iter2 = myuser.begin();
+                    while (iter2 != myuser.end())
+                    {
+                        if (iter2->finduser(tempbankcardID,tempuserpassword) == 0)
+                        {
+                            loginchoose(*iter2);
+                            return 0;
+                        }
+                        iter2++;
+                    }
+                    cout << "密码输入有误" << endl;
+                }
+                iter1->setflag();
+                cout << "账户已冻结" << endl;
+                return -1;
+            }
+            else
+            {
+                cout << "您的账户已冻结" << endl;
+                return -1;
+            }
+        }
+        iter1++;
+    }
+    cout << "卡号输入有误" << endl;
+    return -1;
+}
+
 void admin::showmain()
 {
     int ah;
@@ -148,6 +288,77 @@ int admin::readinfile(void)
     cout << "read called" << endl;
     return 0;
 }
+
+int admin::resetuserflag()
+{
+    string temppassword;
+    long tempbankcardID;
+    cout << "请输入管理密码" << endl;
+    cin >> temppassword;
+    if (temppassword == adminpassword)
+    {
+        cout << "请输入要解冻的卡号" << endl;
+        cin >> tempbankcardID;
+        vector<user>::iterator iter = myuser.begin();
+        while (iter != myuser.end())
+        {
+            if (iter->findusertransfer(tempbankcardID) == 0)
+            {
+                if (iter->getflag() == 1)
+                {
+                    cout << "您的账户未冻结" << endl;
+                    return -1;
+                }
+                else
+                {
+                    iter->resetflag();
+                    cout << "解冻成功" << endl;
+                    return 0;
+                }
+            }
+            iter++;
+        }
+        cout << "卡号输入有误" << endl;
+        return -1;
+    }
+    else
+    {
+        cout << "密码输入有误" << endl;
+        return -1;
+    }
+}
+
+int admin::writeinfile(void)
+{
+    streambuf* backup;
+    ofstream fout;
+    fout.open("./bank.txt");
+    backup = cout.rdbuf();
+    cout.rdbuf(fout.rdbuf());
+
+    cout << usernum << endl;
+    cout << user::bankcardID0 << endl;
+
+    cout.rdbuf(backup);
+    fout.close();
+
+    fout.open("./bank.txt",ios::app);
+    backup = cout.rdbuf();
+    cout.rdbuf(fout.rdbuf());
+
+    vector<user>::iterator iter = myuser.begin();
+    while (iter != myuser.end())
+    {
+        iter->writeuser();
+        iter++;
+    }
+    cout.rdbuf(backup);
+    fout.close();
+    cout << "write called" << endl;
+    return 0;
+}
+
+
 int main()
 {
     admin mybank;
