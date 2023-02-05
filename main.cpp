@@ -90,14 +90,18 @@ void user::deposit(void)
     cout << "请输入存款金额" << endl;
     cin >> income;
     remaining += income;
-    cout << "当前余额:" << remianing << endl;
+    cout << "当前余额:" << remaining << endl;
 
     string newcheck;
     string string1 = "+";
     string string2 = changeint(income);
-    string string3 = "--余额:";
+    string string3 = "---余额";
     string string4 = changeint(remaining);
     string string5 = gettime();
+    string string6 = "---ATM存款---";
+	newcheck = string1 + string2 + string3 + string4 + string6 + string5;
+    usercheck.push_back(newcheck);
+    userchecknum++;
 }
 
 void user::showuser(void)
@@ -169,7 +173,8 @@ void user::dispense(void)
     string string4 = changeint(remaining);
     string string5 = gettime();
     string string6 = "---ATM取款---";
-    newcheck = string1 + string2 + string3 + string4 + string5 + string6;
+
+	newcheck = string1 + string2 + string3 + string4 + string6 + string5;
     usercheck.push_back(newcheck);
     userchecknum++;
 }
@@ -196,7 +201,7 @@ int user::transferfrom(string& tempname)
         string string6 = "---转账给";
         string string7 = "---";
 
-        newcheck = string1 + string2 + string3 + string4 + string5 + string6 + string7 + tempname;
+		newcheck = string1 + string2 + string3 + string4 + string6 + tempname + string7 + string5;
         usercheck.push_back(newcheck);
         userchecknum++;
         return income;
@@ -218,15 +223,95 @@ void user::transferto(int& in,string& tempname)
     string string5 = gettime();
     string string6 = "---来自";
     string string7 = "的转账---";
-    newcheck = string1 + string2 + string3 + string4 + string5 + string6 + string7 + tempname;
+	newcheck = string1 + string2 + string3 + string4 + string6 + tempname + string7 + string5;
     usercheck.push_back(newcheck);
     userchecknum++;
 }
 
 int user::changepassword(void)
 {
+    string temppassword1;
+    string temppassword2;
+    string temppassword3;
+    cout << "请输入当前密码" << endl;
+    cin >> temppassword1;
+    if (temppassword1 == userpassword)
+    {
+        cout << "请输入新的密码" << endl;
+        cin >> temppassword2;
+        cout << "请再次输入新的密码" << endl;
+        cin >> temppassword3;
+        if (temppassword2 == temppassword3)
+        {
+            userpassword = temppassword2;
+            return 0;
+        }
+        else
+        {
+            cout << "新密码不一致,请重新输入" << endl;
+        }
+        cout << "密码错误" << endl;
+        return -1;
+    }
     
 }
+
+string user::gettime(void)
+{
+    string mytime;
+    time_t timep1;
+    char* timep2;
+
+    time(&timep1);
+    timep2 = ctime(&timep1);
+    timep2 = strtok(timep2,"\n");
+
+    string p1 = strtok(timep2," ");
+    string p2 = strtok(NULL," ");
+    string p3 = strtok(NULL," ");
+    string p4 = strtok(NULL," ");
+    string p5 = strtok(NULL," ");
+    string p = "/";
+    mytime = p1 + p + p2 + p + p3 + p + p4 + p + p5;
+
+    return mytime;
+}
+
+string user::getname(void)
+{
+    return name;
+}
+
+string user::changeint(int& num)
+{
+    char buf[15] = {0};
+    string retstring;
+
+    sprintf(buf,"%d",num);
+    retstring = buf;
+    return retstring;
+}
+
+long user::getbankcardID(void)
+{
+    return bankcardID;
+}
+
+int user::getflag(void)
+{
+    return flag;
+}
+
+void user::setflag(void)
+{
+    flag = 0;
+}
+
+void user::resetflag(void)
+{
+    flag = 1;
+}
+
 class admin
 {
     public:
@@ -476,6 +561,69 @@ int admin::writeinfile(void)
     return 0;
 }
 
+void admin::loginchoose(user& curuser)
+{
+    int ah;
+    label2: cout << "请选择功能:1、存款 2、取款 3、转账 4、查询 5、修改密码 6、退出" << endl;
+    cin >> ah;
+    switch (ah)
+    {
+    case 1:
+        curuser.deposit();
+        goto label2;
+    case 2:
+        curuser.dispense();
+        goto label2;
+    case 3:
+        admintransfer(curuser);
+        goto label2;
+    case 4:
+        curuser.showuser();
+        goto label2;
+    case 5:
+        curuser.changepassword();
+        goto label2;
+    case 6:
+        break;    
+    default:
+        break;
+    }
+}
+
+int admin::admintransfer(user& curuser)
+{
+    long tempbankID;
+    long curbankID = curuser.getbankcardID();
+    int tempmoney;
+    string tempname1;
+    string tempname2;
+    cout << "请输入对方账户卡号" << endl;
+    cin >> tempbankID;
+    if (tempbankID == curbankID)
+    {
+        cout << "无法转账给自己" << endl;
+        return -1;
+    }
+    vector<user>::iterator iter = myuser.begin();
+    while (iter != myuser.end())
+    {
+        if (iter->findusertransfer(tempbankID) == 0)
+        {
+            tempname1 = iter->getname();
+            tempname2 = curuser.getname();
+            tempmoney = curuser.transferfrom(tempname1);
+            if (tempmoney > 0)
+            {
+                iter->transferto(tempmoney,tempname2);
+                return 0;
+            }
+            return -1;            
+        }
+        iter++;
+    }
+    cout << "卡号输入有误" << endl;
+    return -1;
+}
 
 int main()
 {
