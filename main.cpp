@@ -339,7 +339,7 @@ admin::admin()
 void admin::establish()
 {
     string temppassword;
-    cout << "请输入管理密码" << endl;
+    cout << "请输入管理密码(初始化密码为:123456)" << endl;
     cin >> temppassword;
     
     if (temppassword == adminpassword)
