@@ -217,7 +217,7 @@ void user::transferto(int& in,string& tempname)
 
     string newcheck;
     string string1 = "+";
-    string string2 = changint(income);
+    string string2 = changeint(income);
     string string3 = "---余额:";
     string string4 = changeint(remaining);
     string string5 = gettime();
